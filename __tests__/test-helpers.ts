@@ -159,6 +159,73 @@ export function createObjectMapFixture() {
   };
 }
 
+export function createOrderedLayerMapFixture() {
+  return {
+    height: 1,
+    infinite: false,
+    layers: [
+      {
+        data: [1],
+        height: 1,
+        name: 'Background',
+        type: 'tilelayer',
+        visible: true,
+        width: 1,
+        x: 0,
+        y: 0,
+      },
+      {
+        id: 2,
+        name: 'Objects',
+        objects: [
+          {
+            height: 16,
+            id: 1,
+            name: 'Door',
+            rotation: 0,
+            type: 'trigger',
+            visible: true,
+            width: 16,
+            x: 10,
+            y: 20,
+          },
+        ],
+        type: 'objectgroup',
+        visible: true,
+        x: 0,
+        y: 0,
+      },
+      {
+        data: [1],
+        height: 1,
+        name: 'Foreground',
+        type: 'tilelayer',
+        visible: true,
+        width: 1,
+        x: 0,
+        y: 0,
+      },
+    ],
+    orientation: 'orthogonal',
+    tileheight: 16,
+    tilesets: [
+      {
+        columns: 1,
+        firstgid: 1,
+        image: 'tileset.png',
+        imageheight: 16,
+        imagewidth: 16,
+        name: 'tileset',
+        tilecount: 1,
+        tileheight: 16,
+        tilewidth: 16,
+      },
+    ],
+    tilewidth: 16,
+    width: 1,
+  };
+}
+
 export function createContext() {
   const add = vi.fn((components: CompList<unknown>) => ({ components }));
   const anchor = vi.fn((value: string) => ({ type: 'anchor', value }));
@@ -222,4 +289,30 @@ export function getAddedObject(
   }
 
   return result.value as { components: CompList<unknown> };
+}
+
+export function getZComponent(object: { components: CompList<unknown> }): {
+  type: 'z';
+  value: number;
+} {
+  const zComp = object.components.find(
+    (
+      component,
+    ): component is {
+      type: 'z';
+      value: number;
+    } =>
+      typeof component === 'object' &&
+      component !== null &&
+      'type' in component &&
+      component.type === 'z' &&
+      'value' in component &&
+      typeof component.value === 'number',
+  );
+
+  if (!zComp) {
+    throw new Error('Expected z component.');
+  }
+
+  return zComp;
 }

@@ -3,7 +3,9 @@ import type { CompList, GameObj, KAPLAYCtx, Quad } from 'kaplay';
 import type {
   ParsedTiledLayer,
   ParsedTiledMap,
+  ParsedTiledObjectLayer,
   ParsedTiledTile,
+  ParsedTiledTileLayer,
   TiledLayer,
   TiledLayerComp,
   TiledMap,
@@ -78,10 +80,22 @@ function normalizeTileLayer(layer: TiledTileLayer): ParsedTiledLayer {
     height: layer.height,
     name: layer.name,
     opacity: layer.opacity ?? 1,
+    type: 'tilelayer',
     visible: layer.visible ?? true,
     width: layer.width,
     x: layer.x ?? 0,
     y: layer.y ?? 0,
+    zIndex: 0,
+  };
+}
+
+function normalizeObjectLayer(layer: TiledObjectLayer): ParsedTiledObjectLayer {
+  return {
+    name: layer.name,
+    objects: layer.objects,
+    type: 'objectgroup',
+    visible: layer.visible ?? true,
+    zIndex: 0,
   };
 }
 
@@ -229,14 +243,13 @@ function matchesObjectRule(
 
 export function createLayerRenderer(
   k: KAPLAYCtx,
-  layer: ParsedTiledLayer,
-  layerIndex: number,
+  layer: ParsedTiledTileLayer,
   map: ParsedTiledMap,
   sprite: string,
 ): GameObj {
   return k.add([
     k.pos(0, 0),
-    k.z(layerIndex),
+    k.z(layer.zIndex),
     {
       draw: () => {
         layer.data.forEach((rawGid, index) => {
@@ -272,8 +285,7 @@ export function createLayerRenderer(
 
 export function createMatchedTileObjects(
   k: KAPLAYCtx,
-  layer: ParsedTiledLayer,
-  layerIndex: number,
+  layer: ParsedTiledTileLayer,
   map: ParsedTiledMap,
   options: TiledMapOpt,
 ): GameObj[] {
@@ -324,7 +336,7 @@ export function createMatchedTileObjects(
         k.add([
           k.pos(tile.pos.x, tile.pos.y),
           k.anchor('topleft'),
-          k.z(layerIndex),
+          k.z(layer.zIndex),
           ...rule.comps(tile),
         ] as CompList<unknown>),
       );
@@ -336,7 +348,7 @@ export function createMatchedTileObjects(
 
 export function createMatchedObjectObjects(
   k: KAPLAYCtx,
-  map: ParsedTiledMap,
+  layer: ParsedTiledObjectLayer,
   options: TiledMapOpt,
 ): GameObj[] {
   const rules = options.objects;
@@ -347,48 +359,46 @@ export function createMatchedObjectObjects(
 
   const objects: GameObj[] = [];
 
-  map.objectLayers.forEach((layer, layerIndex) => {
-    if (!(layer.visible ?? true)) {
+  if (!layer.visible) {
+    return objects;
+  }
+
+  layer.objects.forEach((object) => {
+    if (!object.visible) {
       return;
     }
 
-    layer.objects.forEach((object) => {
-      if (!object.visible) {
+    const context: TiledObjectContext = {
+      id: object.id,
+      layer: layer.name,
+      name: object.name,
+      objectSize: {
+        height: object.height,
+        width: object.width,
+      },
+      point: object.point ?? false,
+      pos: {
+        x: object.x,
+        y: object.y,
+      },
+      properties: getPropertyRecord(object.properties),
+      rotation: object.rotation,
+      type: object.type,
+    };
+
+    rules.forEach((rule) => {
+      if (!matchesObjectRule(rule.match, context)) {
         return;
       }
 
-      const context: TiledObjectContext = {
-        id: object.id,
-        layer: layer.name,
-        name: object.name,
-        objectSize: {
-          height: object.height,
-          width: object.width,
-        },
-        point: object.point ?? false,
-        pos: {
-          x: object.x,
-          y: object.y,
-        },
-        properties: getPropertyRecord(object.properties),
-        rotation: object.rotation,
-        type: object.type,
-      };
-
-      rules.forEach((rule) => {
-        if (!matchesObjectRule(rule.match, context)) {
-          return;
-        }
-
-        objects.push(
-          k.add([
-            k.pos(context.pos.x, context.pos.y),
-            k.anchor('topleft'),
-            k.z(map.layers.length + layerIndex),
-            ...rule.comps(context),
-          ] as CompList<unknown>),
-        );
-      });
+      objects.push(
+        k.add([
+          k.pos(context.pos.x, context.pos.y),
+          k.anchor('topleft'),
+          k.z(layer.zIndex),
+          ...rule.comps(context),
+        ] as CompList<unknown>),
+      );
     });
   });
 
@@ -416,20 +426,33 @@ export function parseTiledMap(data: TiledMapData): ParsedTiledMap {
     throw new Error('Tiled tileset columns must be greater than 0.');
   }
 
-  const layers = data.layers.filter(isTileLayer).map((layer) => {
-    if (layer.data.length !== layer.width * layer.height) {
-      throw new Error(
-        `Layer "${layer.name}" data length does not match its dimensions.`,
-      );
+  const layers = data.layers.map((layer, zIndex) => {
+    if (isTileLayer(layer)) {
+      if (layer.data.length !== layer.width * layer.height) {
+        throw new Error(
+          `Layer "${layer.name}" data length does not match its dimensions.`,
+        );
+      }
+
+      return {
+        ...normalizeTileLayer(layer),
+        zIndex,
+      };
     }
 
-    return normalizeTileLayer(layer);
+    if (isObjectLayer(layer)) {
+      return {
+        ...normalizeObjectLayer(layer),
+        zIndex,
+      };
+    }
+
+    throw new Error('Unsupported Tiled layer type.');
   });
 
   return {
     height: data.height,
     layers,
-    objectLayers: data.layers.filter(isObjectLayer),
     orientation: 'orthogonal',
     tileHeight: data.tileheight,
     tileWidth: data.tilewidth,

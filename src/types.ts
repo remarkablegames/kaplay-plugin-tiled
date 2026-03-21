@@ -121,20 +121,29 @@ export interface ParsedTiledTile {
   tileId: number;
 }
 
-export interface ParsedTiledLayer {
+export interface ParsedTiledTileLayer {
   data: number[];
   height: number;
   name: string;
   opacity: number;
+  type: 'tilelayer';
   visible: boolean;
   width: number;
   x: number;
   y: number;
+  zIndex: number;
+}
+
+export interface ParsedTiledObjectLayer {
+  name: string;
+  objects: TiledObject[];
+  type: 'objectgroup';
+  visible: boolean;
+  zIndex: number;
 }
 
 export interface ParsedTiledMap {
   height: number;
-  objectLayers: TiledObjectLayer[];
   orientation: 'orthogonal';
   tileHeight: number;
   tileWidth: number;
@@ -142,6 +151,8 @@ export interface ParsedTiledMap {
   width: number;
   layers: ParsedTiledLayer[];
 }
+
+export type ParsedTiledLayer = ParsedTiledObjectLayer | ParsedTiledTileLayer;
 
 export interface TiledTileMatch {
   gid?: number;

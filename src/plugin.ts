@@ -32,40 +32,37 @@ export function addTiledMap(
   const parsedMap = parseTiledMap(resolveTiledMap(k, map));
   const allowedLayerNames = getLayerNames(opt);
 
-  for (
-    let layerIndex = 0;
-    layerIndex < parsedMap.layers.length;
-    layerIndex += 1
-  ) {
-    const layer = parsedMap.layers[layerIndex];
-
+  parsedMap.layers.forEach((layer) => {
     if (!layer.visible) {
-      continue;
+      return;
     }
 
     if (allowedLayerNames && !allowedLayerNames.has(layer.name)) {
-      continue;
+      return;
     }
 
-    layer.data.forEach((rawGid) => {
-      const parsedGid = parseTileGid(rawGid);
+    if (layer.type === 'tilelayer') {
+      layer.data.forEach((rawGid) => {
+        const parsedGid = parseTileGid(rawGid);
 
-      if (
-        parsedGid &&
-        (parsedGid.gid < parsedMap.tileset.firstGid ||
-          parsedGid.gid > parsedMap.tileset.lastGid)
-      ) {
-        throw new Error(
-          `Tile gid ${String(rawGid)} is outside the supported tileset range.`,
-        );
-      }
-    });
+        if (
+          parsedGid &&
+          (parsedGid.gid < parsedMap.tileset.firstGid ||
+            parsedGid.gid > parsedMap.tileset.lastGid)
+        ) {
+          throw new Error(
+            `Tile gid ${String(rawGid)} is outside the supported tileset range.`,
+          );
+        }
+      });
 
-    createLayerRenderer(k, layer, layerIndex, parsedMap, opt.sprite);
-    createMatchedTileObjects(k, layer, layerIndex, parsedMap, opt);
-  }
+      createLayerRenderer(k, layer, parsedMap, opt.sprite);
+      createMatchedTileObjects(k, layer, parsedMap, opt);
+      return;
+    }
 
-  createMatchedObjectObjects(k, parsedMap, opt);
+    createMatchedObjectObjects(k, layer, opt);
+  });
 }
 
 /**

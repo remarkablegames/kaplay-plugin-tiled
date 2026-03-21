@@ -10,6 +10,9 @@ import {
   createContext,
   createMapFixture,
   createObjectMapFixture,
+  createOrderedLayerMapFixture,
+  getAddedObject,
+  getZComponent,
 } from './test-helpers';
 
 describe('utils', () => {
@@ -70,21 +73,26 @@ describe('utils', () => {
   it('does not spawn tile objects when tile rules fail gid matching', () => {
     const { k } = createContext();
     const parsedMap = parseTiledMap(createMapFixture());
-    const tiles = createMatchedTileObjects(
-      k,
-      parsedMap.layers[0],
-      0,
-      parsedMap,
-      {
-        sprite: 'tileset',
-        tiles: [
-          {
-            comps: () => ['wrong-gid'],
-            match: { gid: 99 },
-          },
-        ],
-      },
+    const groundLayer = parsedMap.layers.find(
+      (
+        layer,
+      ): layer is (typeof parsedMap.layers)[number] & { type: 'tilelayer' } =>
+        layer.type === 'tilelayer' && layer.name === 'Ground',
     );
+
+    if (!groundLayer) {
+      throw new Error('Expected Ground tile layer.');
+    }
+
+    const tiles = createMatchedTileObjects(k, groundLayer, parsedMap, {
+      sprite: 'tileset',
+      tiles: [
+        {
+          comps: () => ['wrong-gid'],
+          match: { gid: 99 },
+        },
+      ],
+    });
 
     expect(tiles).toHaveLength(0);
   });
@@ -468,6 +476,42 @@ describe('utils', () => {
     expect(add).toHaveBeenCalledTimes(2);
   });
 
+  it('preserves Tiled layer order for object and tile z indices', () => {
+    const { add, k } = createContext();
+
+    addTiledMap(k, createOrderedLayerMapFixture() as TiledMap, {
+      objects: [
+        {
+          comps: () => ['door'],
+          match: { layer: 'Objects', name: 'Door', type: 'trigger' },
+        },
+      ],
+      sprite: 'tileset',
+    });
+
+    expect(getZComponent(getAddedObject(add, 0)).value).toBe(0);
+    expect(getZComponent(getAddedObject(add, 1)).value).toBe(1);
+    expect(getZComponent(getAddedObject(add, 2)).value).toBe(2);
+  });
+
+  it('applies layerNames to object layers as well as tile layers', () => {
+    const { add, k } = createContext();
+
+    addTiledMap(k, createOrderedLayerMapFixture() as TiledMap, {
+      layerNames: ['Background'],
+      objects: [
+        {
+          comps: () => ['door'],
+          match: { layer: 'Objects', name: 'Door', type: 'trigger' },
+        },
+      ],
+      sprite: 'tileset',
+    });
+
+    expect(add).toHaveBeenCalledOnce();
+    expect(getZComponent(getAddedObject(add, 0)).value).toBe(0);
+  });
+
   it('does not spawn objects when object rules fail layer, name, or type matching', () => {
     const { add, k } = createContext();
 
@@ -495,7 +539,18 @@ describe('utils', () => {
   it('does not spawn object objects when object rules fail layer matching', () => {
     const { k } = createContext();
     const parsedMap = parseTiledMap(createObjectMapFixture());
-    const objects = createMatchedObjectObjects(k, parsedMap, {
+    const objectLayer = parsedMap.layers.find(
+      (
+        layer,
+      ): layer is (typeof parsedMap.layers)[number] & { type: 'objectgroup' } =>
+        layer.type === 'objectgroup' && layer.name === 'Objects',
+    );
+
+    if (!objectLayer) {
+      throw new Error('Expected Objects object layer.');
+    }
+
+    const objects = createMatchedObjectObjects(k, objectLayer, {
       objects: [
         {
           comps: () => ['wrong-layer'],
@@ -511,7 +566,18 @@ describe('utils', () => {
   it('skips invisible object layers and objects in the object matcher helper', () => {
     const { k } = createContext();
     const parsedMap = parseTiledMap(createObjectMapFixture());
-    const objects = createMatchedObjectObjects(k, parsedMap, {
+    const objectLayer = parsedMap.layers.find(
+      (
+        layer,
+      ): layer is (typeof parsedMap.layers)[number] & { type: 'objectgroup' } =>
+        layer.type === 'objectgroup' && layer.name === 'Objects',
+    );
+
+    if (!objectLayer) {
+      throw new Error('Expected Objects object layer.');
+    }
+
+    const objects = createMatchedObjectObjects(k, objectLayer, {
       objects: [
         {
           comps: () => ['door'],
@@ -522,5 +588,32 @@ describe('utils', () => {
     });
 
     expect(objects).toHaveLength(1);
+  });
+
+  it('returns no objects for invisible object layers in the object matcher helper', () => {
+    const { k } = createContext();
+    const parsedMap = parseTiledMap(createObjectMapFixture());
+    const hiddenLayer = parsedMap.layers.find(
+      (
+        layer,
+      ): layer is (typeof parsedMap.layers)[number] & { type: 'objectgroup' } =>
+        layer.type === 'objectgroup' && layer.name === 'Hidden Objects',
+    );
+
+    if (!hiddenLayer) {
+      throw new Error('Expected Hidden Objects object layer.');
+    }
+
+    const objects = createMatchedObjectObjects(k, hiddenLayer, {
+      objects: [
+        {
+          comps: () => ['ignored'],
+          match: { layer: 'Hidden Objects', name: 'Ignored', type: 'trigger' },
+        },
+      ],
+      sprite: 'tileset',
+    });
+
+    expect(objects).toHaveLength(0);
   });
 });
