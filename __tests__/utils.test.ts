@@ -1,4 +1,4 @@
-import level from '../integration/level.json';
+import level from '../example/level.json';
 import type { TiledMap, TiledMapOpt } from '../src/plugin';
 import { addTiledMap } from '../src/plugin';
 import {
