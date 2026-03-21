@@ -1,16 +1,10 @@
 import level from '../example/level.json';
-import {
-  addTiledMap,
-  type TiledMap,
-  type TiledMapOpt,
-  tiledPlugin,
-} from '../src/plugin';
+import { addTiledMap, type TiledMap, tiledPlugin } from '../src/plugin';
 import {
   createContext,
   createMapFixture,
   getAddedObject,
   getDrawComponent,
-  type TestGlobalScope,
 } from './test-helpers';
 
 describe('addTiledMap', () => {
@@ -116,53 +110,10 @@ describe('addTiledMap', () => {
 describe('tiledPlugin', () => {
   it('binds addTiledMap to the KAPLAY context', () => {
     const { add, k } = createContext();
-    const api = tiledPlugin()(k);
+    const api = tiledPlugin(k);
 
     api.addTiledMap(createMapFixture(), { sprite: 'tileset' });
 
     expect(add).toHaveBeenCalled();
-  });
-
-  it('does not add addTiledMap to globalThis by default', () => {
-    const globalScope = globalThis as TestGlobalScope;
-    const originalAddTiledMap = globalScope.addTiledMap;
-
-    delete globalScope.addTiledMap;
-
-    tiledPlugin()(createContext().k);
-
-    expect(globalScope.addTiledMap).toBeUndefined();
-
-    if (originalAddTiledMap !== undefined) {
-      globalScope.addTiledMap = originalAddTiledMap;
-    }
-  });
-
-  it('adds addTiledMap to globalThis when global is true', () => {
-    const globalScope = globalThis as TestGlobalScope;
-    const originalAddTiledMap = globalScope.addTiledMap;
-    const { add, k } = createContext();
-
-    delete globalScope.addTiledMap;
-
-    tiledPlugin({ global: true })(k);
-
-    expect(globalScope.addTiledMap).toBeTypeOf('function');
-
-    const globalAddTiledMap = globalScope.addTiledMap as unknown as (
-      map: TiledMap,
-      opt: TiledMapOpt,
-    ) => void;
-
-    globalAddTiledMap(createMapFixture(), { sprite: 'tileset' });
-
-    expect(add).toHaveBeenCalled();
-
-    if (originalAddTiledMap !== undefined) {
-      globalScope.addTiledMap = originalAddTiledMap;
-      return;
-    }
-
-    delete globalScope.addTiledMap;
   });
 });

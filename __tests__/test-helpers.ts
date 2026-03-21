@@ -1,11 +1,5 @@
 import type { Comp, CompList, KAPLAYCtx, Quad } from 'kaplay';
 
-import type { TiledMap, TiledMapOpt } from '../src/plugin';
-
-export type TestGlobalScope = typeof globalThis & {
-  addTiledMap?: (map: TiledMap, opt: TiledMapOpt) => void;
-};
-
 export class MockRect {
   constructor(
     public pos: { x: number; y: number },

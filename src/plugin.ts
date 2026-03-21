@@ -13,6 +13,12 @@ import {
 
 export type { TiledMap, TiledMapOpt } from './types';
 
+declare module 'kaplay' {
+  interface KAPLAYCtx {
+    addTiledMap: (map: TiledMap, options: TiledMapOpt) => void;
+  }
+}
+
 /**
  * Add a Tiled map to the current KAPLAY context.
  *
@@ -66,25 +72,15 @@ export function addTiledMap(
 }
 
 /**
- * Create the Tiled plugin for KAPLAY.
+ * KAPLAY plugin that adds `addTiledMap()` to the context.
  *
- * When `global` is enabled, `addTiledMap()` is available on the `window`.
- *
- * @param opt - The plugin options.
- * @returns - The KAPLAY plugin that adds `addTiledMap()`.
+ * @param k - The active KAPLAY context.
+ * @returns - The plugin API.
  */
-export function tiledPlugin({ global = false } = {}) {
-  return (k: KAPLAYCtx) => {
-    const boundAddTiledMap = (map: TiledMap, options: TiledMapOpt) => {
+export function tiledPlugin(k: KAPLAYCtx) {
+  return {
+    addTiledMap(map: TiledMap, options: TiledMapOpt) {
       addTiledMap(k, map, options);
-    };
-
-    if (global) {
-      globalThis.addTiledMap = boundAddTiledMap;
-    }
-
-    return {
-      addTiledMap: boundAddTiledMap,
-    };
+    },
   };
 }

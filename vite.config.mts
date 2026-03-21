@@ -1,29 +1,29 @@
-import { copyFile } from 'node:fs/promises';
+import { copyFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import dts from 'vite-plugin-dts';
 import { defineConfig } from 'vitest/config';
 
+const dist = resolve(import.meta.dirname, 'dist');
+
 export default defineConfig({
   build: {
     lib: {
       entry: resolve(import.meta.dirname, 'src/plugin.ts'),
-      name: 'kaplay-plugin-tiled',
+      name: 'KaplayPluginTiled',
       formats: ['cjs', 'es', 'umd'],
-      fileName: (format) => {
+      fileName: (format, entryName) => {
         switch (format) {
-          case 'cjs':
-            return 'plugin.cjs';
           case 'es':
-            return 'plugin.mjs';
+            return `${entryName}.mjs`;
           case 'umd':
-            return 'plugin.umd.js';
+            return `${entryName}.umd.js`;
           default:
-            return `plugin.${format}.js`;
+            return `${entryName}.${format}`;
         }
       },
     },
-    rollupOptions: {
+    rolldownOptions: {
       external: ['kaplay'],
     },
     sourcemap: true,
@@ -33,16 +33,13 @@ export default defineConfig({
     dts({
       include: ['src'],
       rollupTypes: true,
-      async afterBuild() {
-        const outDir = resolve(import.meta.dirname, 'dist');
-        await Promise.all(
-          ['cts', 'mts'].map((extension) =>
-            copyFile(
-              resolve(outDir, 'plugin.d.ts'),
-              resolve(outDir, `plugin.d.${extension}`),
-            ),
-          ),
-        );
+      afterBuild() {
+        ['cts', 'mts'].forEach((extension) => {
+          copyFileSync(
+            resolve(dist, 'plugin.d.ts'),
+            resolve(dist, `plugin.d.${extension}`),
+          );
+        });
       },
     }),
   ],

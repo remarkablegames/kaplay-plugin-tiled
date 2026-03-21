@@ -5,7 +5,7 @@ import level from './level.json';
 import tilesetUrl from './tileset.png';
 
 const k = kaplay({
-  plugins: [tiledPlugin()],
+  plugins: [tiledPlugin],
 });
 
 k.debug.inspect = true;
