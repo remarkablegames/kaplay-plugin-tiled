@@ -6,7 +6,6 @@ export interface TiledMapOpt {
   layerNames?: string[];
   objects?: TiledObjectRule[];
   sprite: string;
-  tagPrefix?: string;
   tiles?: TiledTileRule[];
 }
 

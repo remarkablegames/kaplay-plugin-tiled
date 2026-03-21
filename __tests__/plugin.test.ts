@@ -100,7 +100,7 @@ describe('addTiledMap', () => {
         tilewidth: 16,
         width: 1,
       },
-      { sprite: 'tileset', tagPrefix: 'map' },
+      { sprite: 'tileset' },
     );
 
     const renderer = getAddedObject(add, 0);
