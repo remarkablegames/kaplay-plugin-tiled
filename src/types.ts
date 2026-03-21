@@ -9,16 +9,6 @@ export interface TiledMapOpt {
   tiles?: TiledTileRule[];
 }
 
-declare module 'kaplay' {
-  interface KAPLAYCtx {
-    addTiledMap: (map: TiledMap, options: TiledMapOpt) => void;
-  }
-}
-
-declare global {
-  var addTiledMap: ((map: TiledMap, options: TiledMapOpt) => void) | undefined;
-}
-
 export type TiledPropertyValue = boolean | number | string;
 
 export interface TiledProperty {

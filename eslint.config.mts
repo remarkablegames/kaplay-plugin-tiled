@@ -15,6 +15,10 @@ export default defineConfig([
   includeIgnoreFile(gitignorePath),
 
   {
+    ignores: ['global.js', 'global.d.ts'],
+  },
+
+  {
     files: ['**/*.{cjs,cts,js,jsx,mjs,mts,ts,tsx}'],
 
     plugins: {

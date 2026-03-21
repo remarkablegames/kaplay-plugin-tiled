@@ -1,23 +1,21 @@
 import level from '../example/level.json';
-import {
-  addTiledMap,
-  type TiledMap,
-  type TiledMapOpt,
-  tiledPlugin,
-} from '../src/plugin';
+import { type TiledMap, tiledPlugin } from '../src/plugin';
 import {
   createContext,
   createMapFixture,
+  createObjectMapFixture,
+  createOrderedLayerMapFixture,
   getAddedObject,
   getDrawComponent,
-  type TestGlobalScope,
+  getZComponent,
 } from './test-helpers';
 
 describe('addTiledMap', () => {
   it('parses the repo fixture and creates one renderer per visible layer', () => {
     const { add, k } = createContext();
+    const api = tiledPlugin(k);
 
-    addTiledMap(k, level as TiledMap, { sprite: 'tileset' });
+    api.addTiledMap(level as TiledMap, { sprite: 'tileset' });
 
     expect(add).toHaveBeenCalledTimes(3);
     expect(add).toHaveBeenCalled();
@@ -25,8 +23,9 @@ describe('addTiledMap', () => {
 
   it('renders tiles through one layer renderer', () => {
     const { add, drawSprite, k, quad } = createContext();
+    const api = tiledPlugin(k);
 
-    addTiledMap(k, createMapFixture(), { sprite: 'tileset' });
+    api.addTiledMap(createMapFixture(), { sprite: 'tileset' });
 
     expect(add).toHaveBeenCalledTimes(1);
 
@@ -57,9 +56,10 @@ describe('addTiledMap', () => {
 
   it('accepts a loaded asset key for the map source', () => {
     const { add, getAsset, k } = createContext();
+    const api = tiledPlugin(k);
     getAsset.mockReturnValue({ data: createMapFixture() });
 
-    addTiledMap(k, 'level', { sprite: 'tileset' });
+    api.addTiledMap('level', { sprite: 'tileset' });
 
     expect(getAsset).toHaveBeenCalledWith('level');
     expect(add).toHaveBeenCalledOnce();
@@ -67,9 +67,9 @@ describe('addTiledMap', () => {
 
   it('uses the default visual path when opacity and colliders are absent', () => {
     const { add, area, body, drawSprite, k } = createContext();
+    const api = tiledPlugin(k);
 
-    addTiledMap(
-      k,
+    api.addTiledMap(
       {
         height: 1,
         infinite: false,
@@ -111,58 +111,158 @@ describe('addTiledMap', () => {
     expect(area).not.toHaveBeenCalled();
     expect(body).not.toHaveBeenCalled();
   });
+
+  it('filters layers when layerNames are provided', () => {
+    const { add, k } = createContext();
+    const api = tiledPlugin(k);
+
+    api.addTiledMap(createMapFixture(), {
+      layerNames: ['Missing'],
+      sprite: 'tileset',
+    });
+
+    expect(add).not.toHaveBeenCalled();
+  });
+
+  it('treats an empty layerNames filter like no filter', () => {
+    const { add, k } = createContext();
+    const api = tiledPlugin(k);
+
+    api.addTiledMap(createMapFixture(), {
+      layerNames: [],
+      sprite: 'tileset',
+    });
+
+    expect(add).toHaveBeenCalledOnce();
+  });
+
+  it('skips invisible layers', () => {
+    const { add, k } = createContext();
+    const api = tiledPlugin(k);
+
+    api.addTiledMap(
+      {
+        height: 1,
+        infinite: false,
+        layers: [
+          {
+            data: [1],
+            height: 1,
+            name: 'Hidden',
+            type: 'tilelayer',
+            visible: false,
+            width: 1,
+          },
+        ],
+        orientation: 'orthogonal',
+        tileheight: 16,
+        tilesets: [
+          {
+            columns: 1,
+            firstgid: 1,
+            image: 'tileset.png',
+            imageheight: 16,
+            imagewidth: 16,
+            name: 'tileset',
+            tilecount: 1,
+            tileheight: 16,
+            tilewidth: 16,
+          },
+        ],
+        tilewidth: 16,
+        width: 1,
+      },
+      { sprite: 'tileset' },
+    );
+
+    expect(add).not.toHaveBeenCalled();
+  });
+
+  it('throws when a tile gid is outside the supported tileset range', () => {
+    const { k } = createContext();
+    const api = tiledPlugin(k);
+    const map = createMapFixture();
+
+    expect(() => {
+      api.addTiledMap(
+        {
+          ...map,
+          layers: [
+            {
+              ...map.layers[0],
+              data: [99, 0, 0, 0],
+            },
+            ...map.layers.slice(1),
+          ],
+        },
+        { sprite: 'tileset' },
+      );
+    }).toThrow('Tile gid 99 is outside the supported tileset range.');
+  });
+
+  it('skips invisible object layers and invisible objects', () => {
+    const { add, k } = createContext();
+    const api = tiledPlugin(k);
+
+    api.addTiledMap(createObjectMapFixture() as TiledMap, {
+      objects: [
+        {
+          comps: () => ['door'],
+          match: { layer: 'Objects', name: 'Door', type: 'trigger' },
+        },
+      ],
+      sprite: 'tileset',
+    });
+
+    expect(add).toHaveBeenCalledTimes(2);
+  });
+
+  it('preserves Tiled layer order for object and tile z indices', () => {
+    const { add, k } = createContext();
+    const api = tiledPlugin(k);
+
+    api.addTiledMap(createOrderedLayerMapFixture() as TiledMap, {
+      objects: [
+        {
+          comps: () => ['door'],
+          match: { layer: 'Objects', name: 'Door', type: 'trigger' },
+        },
+      ],
+      sprite: 'tileset',
+    });
+
+    expect(getZComponent(getAddedObject(add, 0)).value).toBe(0);
+    expect(getZComponent(getAddedObject(add, 1)).value).toBe(1);
+    expect(getZComponent(getAddedObject(add, 2)).value).toBe(2);
+  });
+
+  it('applies layerNames to object layers as well as tile layers', () => {
+    const { add, k } = createContext();
+    const api = tiledPlugin(k);
+
+    api.addTiledMap(createOrderedLayerMapFixture() as TiledMap, {
+      layerNames: ['Background'],
+      objects: [
+        {
+          comps: () => ['door'],
+          match: { layer: 'Objects', name: 'Door', type: 'trigger' },
+        },
+      ],
+      sprite: 'tileset',
+    });
+
+    expect(add).toHaveBeenCalledOnce();
+    expect(getZComponent(getAddedObject(add, 0)).value).toBe(0);
+  });
 });
 
 describe('tiledPlugin', () => {
   it('binds addTiledMap to the KAPLAY context', () => {
     const { add, k } = createContext();
-    const api = tiledPlugin()(k);
+    const api = tiledPlugin(k);
 
     api.addTiledMap(createMapFixture(), { sprite: 'tileset' });
 
     expect(add).toHaveBeenCalled();
-  });
-
-  it('does not add addTiledMap to globalThis by default', () => {
-    const globalScope = globalThis as TestGlobalScope;
-    const originalAddTiledMap = globalScope.addTiledMap;
-
-    delete globalScope.addTiledMap;
-
-    tiledPlugin()(createContext().k);
-
-    expect(globalScope.addTiledMap).toBeUndefined();
-
-    if (originalAddTiledMap !== undefined) {
-      globalScope.addTiledMap = originalAddTiledMap;
-    }
-  });
-
-  it('adds addTiledMap to globalThis when global is true', () => {
-    const globalScope = globalThis as TestGlobalScope;
-    const originalAddTiledMap = globalScope.addTiledMap;
-    const { add, k } = createContext();
-
-    delete globalScope.addTiledMap;
-
-    tiledPlugin({ global: true })(k);
-
-    expect(globalScope.addTiledMap).toBeTypeOf('function');
-
-    const globalAddTiledMap = globalScope.addTiledMap as unknown as (
-      map: TiledMap,
-      opt: TiledMapOpt,
-    ) => void;
-
-    globalAddTiledMap(createMapFixture(), { sprite: 'tileset' });
-
-    expect(add).toHaveBeenCalled();
-
-    if (originalAddTiledMap !== undefined) {
-      globalScope.addTiledMap = originalAddTiledMap;
-      return;
-    }
-
-    delete globalScope.addTiledMap;
   });
 });

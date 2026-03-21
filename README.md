@@ -39,7 +39,7 @@ import kaplay from 'kaplay';
 import { tiledPlugin } from 'kaplay-plugin-tiled';
 
 const k = kaplay({
-  plugins: [tiledPlugin()],
+  plugins: [tiledPlugin],
 });
 ```
 
@@ -69,6 +69,15 @@ k.onLoad(() => {
 });
 ```
 
+If you use KAPLAY globals, load the ambient types explicitly:
+
+```ts
+import 'kaplay/global';
+import 'kaplay-plugin-tiled/global';
+```
+
+This adds the ambient type for `addTiledMap(...)`. The runtime global still depends on KAPLAY's global setup.
+
 The current implementation is intentionally small:
 
 - finite orthogonal Tiled JSON only
@@ -83,7 +92,7 @@ To load the plugin using a script:
 
 <script>
   const k = kaplay({
-    plugins: [window['kaplay-plugin-tiled'].tiledPlugin()],
+    plugins: [KaplayPluginTiled.tiledPlugin],
   });
 </script>
 ```
