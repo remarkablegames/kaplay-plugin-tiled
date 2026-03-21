@@ -1,6 +1,6 @@
 {
   "name": "kaplay-plugin-tiled",
-  "version": "1.0.0-alpha",
+  "version": "1.0.0",
   "description": "KAPLAY plugin for Tiled maps",
   "author": "Mark <mark@remarkablemark.org> (https://remarkablemark.org)",
   "main": "./dist/plugin.cjs",
