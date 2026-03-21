@@ -4,9 +4,9 @@
 
 [![NPM version](https://img.shields.io/npm/v/kaplay-plugin-tiled.svg)](https://www.npmjs.com/package/kaplay-plugin-tiled)
 [![build](https://github.com/remarkablegames/kaplay-plugin-tiled/actions/workflows/build.yml/badge.svg)](https://github.com/remarkablegames/kaplay-plugin-tiled/actions/workflows/build.yml)
-[![codecov](https://codecov.io/gh/remarkablegames/kaplay-plugin-tiled/graph/badge.svg?token=E7kjfLCpkM)](https://codecov.io/gh/remarkablegames/kaplay-plugin-tiled)
+[![codecov](https://codecov.io/gh/remarkablegames/kaplay-plugin-tiled/graph/badge.svg?token=WriHyIpFCh)](https://codecov.io/gh/remarkablegames/kaplay-plugin-tiled)
 
-Kaplay Plugin Template
+[KAPLAY](https://kaplayjs.com/) plugin for loading finite orthogonal [Tiled](https://www.mapeditor.org/) JSON maps.
 
 ## Prerequisites
 
@@ -36,24 +36,40 @@ Use the plugin in your game:
 
 ```ts
 import kaplay from 'kaplay';
-import { examplePlugin } from 'kaplay-plugin-tiled';
+import { tiledPlugin } from 'kaplay-plugin-tiled';
+
+import level from './level.json';
+import tilesetUrl from './tileset.png';
 
 const k = kaplay({
-  plugins: [examplePlugin()],
+  plugins: [tiledPlugin()],
 });
 
-k.example();
-```
+k.loadSprite('tileset', tilesetUrl);
 
-To expose `example` on the window, enable the `global` option:
-
-```ts
-const k = kaplay({
-  plugins: [examplePlugin({ global: true })],
+k.onLoad(() => {
+  k.addTiledMap(level, {
+    sprite: 'tileset',
+    objects: [
+      {
+        match: { properties: { collides: true } },
+        comps: ({ objectSize }) => [
+          k.area({
+            shape: new k.Rect(k.vec2(), objectSize.width, objectSize.height),
+          }),
+          k.body({ isStatic: true }),
+        ],
+      },
+    ],
+  });
 });
-
-example();
 ```
+
+The current implementation is intentionally small:
+
+- finite orthogonal Tiled JSON only
+- 1 tileset per map
+- visible tile layers plus optional `tiles` and `objects` matchers for extra spawned components
 
 To load the plugin using a script:
 
@@ -63,10 +79,8 @@ To load the plugin using a script:
 
 <script>
   const k = kaplay({
-    plugins: [window['kaplay-plugin-tiled'].examplePlugin()],
+    plugins: [window['kaplay-plugin-tiled'].tiledPlugin()],
   });
-
-  k.example();
 </script>
 ```
 

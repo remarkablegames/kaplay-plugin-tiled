@@ -1,18 +1,16 @@
-import type { KAPLAYCtx } from 'kaplay';
+import { createRequire } from 'node:module';
+import { resolve } from 'node:path';
 
-import { examplePlugin } from '../dist/plugin.mjs';
+const require = createRequire(import.meta.url);
 
 describe('dist/plugin.mjs', () => {
-  it('adds example', () => {
-    const log = vi.fn();
-    const k = {
-      debug: {
-        log,
-      },
-    } as unknown as KAPLAYCtx;
+  it('exports the tiled helpers', () => {
+    const plugin = require(
+      resolve(import.meta.dirname, '../dist/plugin.cjs'),
+    ) as Record<string, unknown>;
 
-    examplePlugin()(k).example();
-
-    expect(log).toHaveBeenCalledExactlyOnceWith('kaplay-plugin-tiled');
+    expect(plugin.parseTiledMap).toBeUndefined();
+    expect(plugin.addTiledMap).toBeTypeOf('function');
+    expect(plugin.tiledPlugin).toBeTypeOf('function');
   });
 });
