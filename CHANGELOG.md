@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/remarkablegames/kaplay-plugin-tiled/compare/v1.1.0...v1.1.1) (2026-03-21)
+
+
+### Code Refactoring
+
+* **plugin:** export type `AddTiledMap` ([4a73d2b](https://github.com/remarkablegames/kaplay-plugin-tiled/commit/4a73d2b073724cc804a185ed42606a2dd9031d30))
+
 ## [1.1.0](https://github.com/remarkablegames/kaplay-plugin-tiled/compare/v1.0.0...v1.1.0) (2026-03-21)
 
 
