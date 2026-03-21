@@ -416,7 +416,7 @@ describe('createMatchedTileObjects', () => {
     expect(add).not.toHaveBeenCalled();
   });
 
-  it('passes normalized flip, gid, tileId, positions, and z index into spawned tile objects', () => {
+  it('passes normalized flip, gid, tile coordinates, pixel coordinates, and z index into spawned tile objects', () => {
     const { add, k } = createContext();
     const parsedMap = parseTiledMap({
       ...createMapFixture(),
@@ -437,17 +437,34 @@ describe('createMatchedTileObjects', () => {
       sprite: 'tileset',
       tiles: [
         {
-          comps: ({ flip, gid, pos, tileId, tilePos, tileSize }) => {
+          comps: ({
+            flip,
+            gid,
+            height,
+            tileHeight,
+            tileId,
+            tileWidth,
+            tileX,
+            tileY,
+            width,
+            x,
+            y,
+          }) => {
             expect(flip).toEqual({
               diagonal: false,
               horizontal: true,
               vertical: false,
             });
             expect(gid).toBe(2);
-            expect(pos).toEqual({ x: 0, y: 0 });
+            expect(x).toBe(0);
+            expect(y).toBe(0);
+            expect(width).toBe(16);
+            expect(height).toBe(16);
             expect(tileId).toBe(1);
-            expect(tilePos).toEqual({ x: 0, y: 0 });
-            expect(tileSize).toEqual({ height: 16, width: 16 });
+            expect(tileX).toBe(0);
+            expect(tileY).toBe(0);
+            expect(tileWidth).toBe(16);
+            expect(tileHeight).toBe(16);
 
             return ['matched'];
           },
@@ -483,17 +500,15 @@ describe('createMatchedObjectObjects', () => {
     const objects = createMatchedObjectObjects(k, objectLayer, {
       objects: [
         {
-          comps: ({ objectSize }) => [
-            area({
-              shape: new k.Rect(
-                k.vec2(0, 0),
-                objectSize.width,
-                objectSize.height,
-              ),
-            }),
-            body({ isStatic: true }),
-            'door',
-          ],
+          comps: ({ height, width }) => {
+            return [
+              area({
+                shape: new k.Rect(k.vec2(0, 0), width, height),
+              }),
+              body({ isStatic: true }),
+              'door',
+            ];
+          },
           match: { name: 'Door', type: 'trigger' },
         },
       ],

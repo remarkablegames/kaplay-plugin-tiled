@@ -1,11 +1,11 @@
 import '../global';
 import '../src/plugin';
 
-type AddTiledMap = NonNullable<typeof addTiledMap>;
+import type { AddTiledMap } from '../src/types';
 
 export function assertGlobalTyping() {
-  const assertAddTiledMap = (addTiledMap: AddTiledMap) => {
-    addTiledMap('level', {
+  const assertAddTiledMap = (addTiledMapFn: AddTiledMap) => {
+    addTiledMapFn('level', {
       sprite: 'tileset',
     });
   };
@@ -14,5 +14,7 @@ export function assertGlobalTyping() {
 }
 
 export function assertMixedImportTyping() {
-  return addTiledMap;
+  const globalAddTiledMap: AddTiledMap = addTiledMap;
+
+  return globalAddTiledMap;
 }

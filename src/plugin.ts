@@ -1,6 +1,6 @@
 import type { KAPLAYCtx } from 'kaplay';
 
-import type { TiledMap, TiledMapOpt } from './types';
+import type { AddTiledMap, TiledMap, TiledMapOpt } from './types';
 import {
   createLayerRenderer,
   createMatchedObjectObjects,
@@ -11,7 +11,7 @@ import {
   resolveTiledMap,
 } from './utils';
 
-export type { TiledMap, TiledMapOpt } from './types';
+export type { AddTiledMap, TiledMap, TiledMapOpt } from './types';
 
 declare module 'kaplay' {
   interface KAPLAYCtx {
@@ -66,8 +66,6 @@ function addTiledMap(k: KAPLAYCtx, map: TiledMap, opt: TiledMapOpt): void {
     createMatchedObjectObjects(k, layer, opt);
   });
 }
-
-export type AddTiledMap = (map: TiledMap, options: TiledMapOpt) => void;
 
 /**
  * KAPLAY plugin that adds `addTiledMap()` to the context.

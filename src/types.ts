@@ -1,6 +1,7 @@
 import type { CompList, KAPLAYCtx } from 'kaplay';
 
 export type TiledMap = TiledMapData | string;
+export type AddTiledMap = (map: TiledMap, options: TiledMapOpt) => void;
 
 export interface TiledMapOpt {
   layerNames?: string[];
@@ -159,20 +160,16 @@ export interface TiledTileContext {
   };
   gid: number;
   layer: string;
-  pos: {
-    x: number;
-    y: number;
-  };
+  height: number;
+  tileHeight: number;
+  tileWidth: number;
+  tileX: number;
+  tileY: number;
+  width: number;
+  x: number;
+  y: number;
   properties: Record<string, TiledPropertyValue>;
-  tileSize: {
-    height: number;
-    width: number;
-  };
   tileId: number;
-  tilePos: {
-    x: number;
-    y: number;
-  };
 }
 
 export interface TiledTileRule {
@@ -188,18 +185,14 @@ export interface TiledObjectMatch {
 }
 
 export interface TiledObjectContext {
+  height: number;
   id: number;
   layer: string;
   name: string;
-  objectSize: {
-    height: number;
-    width: number;
-  };
+  width: number;
+  x: number;
+  y: number;
   point: boolean;
-  pos: {
-    x: number;
-    y: number;
-  };
   properties: Record<string, TiledPropertyValue>;
   rotation: number;
   type: string;
