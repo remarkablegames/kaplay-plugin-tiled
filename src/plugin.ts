@@ -7,6 +7,7 @@ import {
   createMatchedTileObjects,
   getLayerNames,
   parseTiledMap,
+  parseTileGid,
   resolveTiledMap,
 } from './utils';
 
@@ -46,13 +47,16 @@ export function addTiledMap(
       continue;
     }
 
-    layer.data.forEach((gid) => {
+    layer.data.forEach((rawGid) => {
+      const parsedGid = parseTileGid(rawGid);
+
       if (
-        gid !== 0 &&
-        (gid < parsedMap.tileset.firstGid || gid > parsedMap.tileset.lastGid)
+        parsedGid &&
+        (parsedGid.gid < parsedMap.tileset.firstGid ||
+          parsedGid.gid > parsedMap.tileset.lastGid)
       ) {
         throw new Error(
-          `Tile gid ${String(gid)} is outside the supported tileset range.`,
+          `Tile gid ${String(rawGid)} is outside the supported tileset range.`,
         );
       }
     });

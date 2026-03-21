@@ -299,6 +299,141 @@ describe('utils', () => {
     }).toThrow('Tile gid 99 is outside the supported tileset range.');
   });
 
+  it('normalizes flipped gids for range checks, matching, and sprite quads', () => {
+    const { add, drawSprite, k, quad } = createContext();
+
+    addTiledMap(
+      k,
+      {
+        ...createMapFixture(),
+        layers: [
+          {
+            ...createMapFixture().layers[0],
+            data: [0x80000002, 0, 0, 0],
+          },
+        ],
+      },
+      {
+        sprite: 'tileset',
+        tiles: [
+          {
+            comps: ({ flip, gid, tileId }) => {
+              expect(flip).toEqual({
+                diagonal: false,
+                horizontal: true,
+                vertical: false,
+              });
+              expect(gid).toBe(2);
+              expect(tileId).toBe(1);
+
+              return ['matched'];
+            },
+            match: {
+              gid: 2,
+              properties: { collides: true },
+              tileId: 1,
+            },
+          },
+        ],
+      },
+    );
+
+    const renderer = add.mock.results[0]?.value as { components: unknown[] };
+    const drawComp = renderer.components.find(
+      (component): component is { draw: () => void } =>
+        typeof component === 'object' &&
+        component !== null &&
+        'draw' in component &&
+        typeof component.draw === 'function',
+    );
+
+    drawComp?.draw();
+
+    expect(quad).toHaveBeenCalledWith(0.5, 0, 0.5, 0.5);
+    expect(drawSprite).toHaveBeenCalledWith(
+      expect.objectContaining({
+        angle: 0,
+        flipX: true,
+        flipY: false,
+      }),
+    );
+    expect(add).toHaveBeenCalledTimes(2);
+  });
+
+  it('renders diagonal-only flipped tiles with the expected transform', () => {
+    const { add, drawSprite, k } = createContext();
+
+    addTiledMap(
+      k,
+      {
+        ...createMapFixture(),
+        layers: [
+          {
+            ...createMapFixture().layers[0],
+            data: [0x20000001, 0, 0, 0],
+          },
+        ],
+      },
+      { sprite: 'tileset' },
+    );
+
+    const renderer = add.mock.results[0]?.value as { components: unknown[] };
+    const drawComp = renderer.components.find(
+      (component): component is { draw: () => void } =>
+        typeof component === 'object' &&
+        component !== null &&
+        'draw' in component &&
+        typeof component.draw === 'function',
+    );
+
+    drawComp?.draw();
+
+    expect(drawSprite).toHaveBeenCalledWith(
+      expect.objectContaining({
+        angle: 270,
+        flipX: false,
+        flipY: true,
+      }),
+    );
+  });
+
+  it('renders diagonal plus horizontal plus vertical flips with the expected transform', () => {
+    const { add, drawSprite, k } = createContext();
+
+    addTiledMap(
+      k,
+      {
+        ...createMapFixture(),
+        layers: [
+          {
+            ...createMapFixture().layers[0],
+            data: [0xe0000001, 0, 0, 0],
+          },
+        ],
+      },
+      { sprite: 'tileset' },
+    );
+
+    const renderer = add.mock.results[0]?.value as { components: unknown[] };
+    const drawComp = renderer.components.find(
+      (component): component is { draw: () => void } =>
+        typeof component === 'object' &&
+        component !== null &&
+        'draw' in component &&
+        typeof component.draw === 'function',
+    );
+
+    drawComp?.draw();
+
+    expect(drawSprite).toHaveBeenCalledWith(
+      expect.objectContaining({
+        angle: 270,
+        flipX: true,
+        flipY: false,
+      }),
+    );
+  });
+
   it('throws when a map asset key is missing', () => {
     const { getAsset, k } = createContext();
     getAsset.mockReturnValue(null);

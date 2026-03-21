@@ -152,6 +152,11 @@ export interface TiledTileMatch {
 }
 
 export interface TiledTileContext {
+  flip: {
+    diagonal: boolean;
+    horizontal: boolean;
+    vertical: boolean;
+  };
   gid: number;
   layer: string;
   pos: {

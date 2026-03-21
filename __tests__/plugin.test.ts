@@ -38,15 +38,20 @@ describe('addTiledMap', () => {
     expect(quad).toHaveBeenNthCalledWith(1, 0, 0, 0.5, 0.5);
     expect(drawSprite).toHaveBeenNthCalledWith(
       1,
-      expect.objectContaining({ pos: { x: 0, y: 0 } }),
+      expect.objectContaining({
+        angle: 0,
+        flipX: false,
+        flipY: false,
+        pos: { x: 8, y: 8 },
+      }),
     );
     expect(drawSprite).toHaveBeenNthCalledWith(
       2,
-      expect.objectContaining({ pos: { x: 0, y: 16 } }),
+      expect.objectContaining({ pos: { x: 8, y: 24 } }),
     );
     expect(drawSprite).toHaveBeenNthCalledWith(
       3,
-      expect.objectContaining({ pos: { x: 16, y: 16 } }),
+      expect.objectContaining({ pos: { x: 24, y: 24 } }),
     );
   });
 

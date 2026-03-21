@@ -19,6 +19,21 @@ import type {
   TiledTileMatch,
 } from './types';
 
+const FLIPPED_HORIZONTALLY_FLAG = 0x80000000;
+const FLIPPED_VERTICALLY_FLAG = 0x40000000;
+const FLIPPED_DIAGONALLY_FLAG = 0x20000000;
+const FLIP_FLAGS =
+  FLIPPED_HORIZONTALLY_FLAG | FLIPPED_VERTICALLY_FLAG | FLIPPED_DIAGONALLY_FLAG;
+
+interface ParsedTileGid {
+  gid: number;
+  flip: {
+    diagonal: boolean;
+    horizontal: boolean;
+    vertical: boolean;
+  };
+}
+
 export function resolveTiledMap(k: KAPLAYCtx, map: TiledMap): TiledMapData {
   if (typeof map !== 'string') {
     return map;
@@ -67,6 +82,65 @@ function normalizeTileLayer(layer: TiledTileLayer): ParsedTiledLayer {
     width: layer.width,
     x: layer.x ?? 0,
     y: layer.y ?? 0,
+  };
+}
+
+export function parseTileGid(rawGid: number): ParsedTileGid | null {
+  if (rawGid === 0) {
+    return null;
+  }
+
+  return {
+    gid: (rawGid & ~FLIP_FLAGS) >>> 0,
+    flip: {
+      diagonal: (rawGid & FLIPPED_DIAGONALLY_FLAG) !== 0,
+      horizontal: (rawGid & FLIPPED_HORIZONTALLY_FLAG) !== 0,
+      vertical: (rawGid & FLIPPED_VERTICALLY_FLAG) !== 0,
+    },
+  };
+}
+
+function getTileDrawTransform(flip: ParsedTileGid['flip']): {
+  angle: number;
+  flipX: boolean;
+  flipY: boolean;
+} {
+  if (!flip.diagonal) {
+    return {
+      angle: 0,
+      flipX: flip.horizontal,
+      flipY: flip.vertical,
+    };
+  }
+
+  if (flip.horizontal && flip.vertical) {
+    return {
+      angle: 270,
+      flipX: true,
+      flipY: false,
+    };
+  }
+
+  if (flip.horizontal) {
+    return {
+      angle: 270,
+      flipX: false,
+      flipY: false,
+    };
+  }
+
+  if (flip.vertical) {
+    return {
+      angle: 90,
+      flipX: false,
+      flipY: false,
+    };
+  }
+
+  return {
+    angle: 270,
+    flipX: false,
+    flipY: true,
   };
 }
 
@@ -165,22 +239,28 @@ export function createLayerRenderer(
     k.z(layerIndex),
     {
       draw: () => {
-        layer.data.forEach((gid, index) => {
-          if (gid === 0) {
+        layer.data.forEach((rawGid, index) => {
+          const parsedGid = parseTileGid(rawGid);
+
+          if (!parsedGid) {
             return;
           }
 
           const column = index % layer.width;
           const row = Math.floor(index / layer.width);
+          const drawTransform = getTileDrawTransform(parsedGid.flip);
 
           k.drawSprite({
-            anchor: 'topleft',
+            anchor: 'center',
+            angle: drawTransform.angle,
+            flipX: drawTransform.flipX,
+            flipY: drawTransform.flipY,
             opacity: layer.opacity,
             pos: k.vec2(
-              (column + layer.x) * map.tileWidth,
-              (row + layer.y) * map.tileHeight,
+              (column + layer.x) * map.tileWidth + map.tileset.tileWidth / 2,
+              (row + layer.y) * map.tileHeight + map.tileset.tileHeight / 2,
             ),
-            quad: getTileQuad(k, map, gid),
+            quad: getTileQuad(k, map, parsedGid.gid),
             sprite,
           });
         });
@@ -205,16 +285,19 @@ export function createMatchedTileObjects(
 
   const tiles: GameObj[] = [];
 
-  layer.data.forEach((gid, index) => {
-    if (gid === 0) {
+  layer.data.forEach((rawGid, index) => {
+    const parsedGid = parseTileGid(rawGid);
+
+    if (!parsedGid) {
       return;
     }
 
-    const parsedTile = getParsedTile(map, gid);
+    const parsedTile = getParsedTile(map, parsedGid.gid);
     const column = index % layer.width;
     const row = Math.floor(index / layer.width);
     const tile = {
-      gid,
+      flip: parsedGid.flip,
+      gid: parsedGid.gid,
       layer: layer.name,
       pos: {
         x: (column + layer.x) * map.tileWidth,
@@ -225,7 +308,7 @@ export function createMatchedTileObjects(
         height: map.tileHeight,
         width: map.tileWidth,
       },
-      tileId: parsedTile?.tileId ?? gid - map.tileset.firstGid,
+      tileId: parsedTile?.tileId ?? parsedGid.gid - map.tileset.firstGid,
       tilePos: {
         x: column + layer.x,
         y: row + layer.y,
