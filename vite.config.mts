@@ -8,7 +8,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(import.meta.dirname, 'src/plugin.ts'),
-      name: 'kaplay-plugin-template',
+      name: 'kaplay-plugin-tiled',
       formats: ['cjs', 'es', 'umd'],
       fileName: (format) => {
         switch (format) {

@@ -22,7 +22,7 @@ describe('plugin', () => {
   it('logs the template name', () => {
     examplePlugin()(k).example();
 
-    expect(log).toHaveBeenCalledExactlyOnceWith('kaplay-plugin-template');
+    expect(log).toHaveBeenCalledExactlyOnceWith('kaplay-plugin-tiled');
   });
 
   it('registers example on globalThis when global is enabled', () => {
@@ -32,6 +32,6 @@ describe('plugin', () => {
 
     globalThis.example();
 
-    expect(log).toHaveBeenCalledExactlyOnceWith('kaplay-plugin-template');
+    expect(log).toHaveBeenCalledExactlyOnceWith('kaplay-plugin-tiled');
   });
 });

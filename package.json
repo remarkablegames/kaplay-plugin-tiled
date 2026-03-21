@@ -1,5 +1,5 @@
 {
-  "name": "kaplay-plugin-template",
+  "name": "kaplay-plugin-tiled",
   "version": "1.0.0-alpha",
   "description": "KAPLAY plugin template",
   "author": "Mark <mark@remarkablemark.org> (https://remarkablemark.org)",
@@ -36,10 +36,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/remarkablegames/kaplay-plugin-template.git"
+    "url": "git+https://github.com/remarkablegames/kaplay-plugin-tiled.git"
   },
   "bugs": {
-    "url": "https://github.com/remarkablegames/kaplay-plugin-template/issues"
+    "url": "https://github.com/remarkablegames/kaplay-plugin-tiled/issues"
   },
   "keywords": [
     "kaplay",

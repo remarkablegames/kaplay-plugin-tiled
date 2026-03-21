@@ -13,7 +13,7 @@ declare global {
 export function examplePlugin({ global = false } = {}) {
   return (k: KAPLAYCtx) => {
     const example = () => {
-      k.debug.log('kaplay-plugin-template');
+      k.debug.log('kaplay-plugin-tiled');
     };
 
     if (global) {
