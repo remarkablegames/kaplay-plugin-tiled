@@ -310,21 +310,17 @@ export function createMatchedTileObjects(
     const tile = {
       flip: parsedGid.flip,
       gid: parsedGid.gid,
+      height: map.tileHeight,
       layer: layer.name,
-      pos: {
-        x: (column + layer.x) * map.tileWidth,
-        y: (row + layer.y) * map.tileHeight,
-      },
+      tileHeight: map.tileHeight,
+      tileWidth: map.tileWidth,
+      tileX: column + layer.x,
+      tileY: row + layer.y,
+      width: map.tileWidth,
+      x: (column + layer.x) * map.tileWidth,
+      y: (row + layer.y) * map.tileHeight,
       properties: parsedTile?.properties ?? {},
-      tileSize: {
-        height: map.tileHeight,
-        width: map.tileWidth,
-      },
       tileId: parsedTile?.tileId ?? parsedGid.gid - map.tileset.firstGid,
-      tilePos: {
-        x: column + layer.x,
-        y: row + layer.y,
-      },
     };
 
     rules.forEach((rule) => {
@@ -334,7 +330,7 @@ export function createMatchedTileObjects(
 
       tiles.push(
         k.add([
-          k.pos(tile.pos.x, tile.pos.y),
+          k.pos(tile.x, tile.y),
           k.anchor('topleft'),
           k.z(layer.zIndex),
           ...rule.comps(tile),
@@ -369,18 +365,14 @@ export function createMatchedObjectObjects(
     }
 
     const context: TiledObjectContext = {
+      height: object.height,
       id: object.id,
       layer: layer.name,
       name: object.name,
-      objectSize: {
-        height: object.height,
-        width: object.width,
-      },
+      width: object.width,
+      x: object.x,
+      y: object.y,
       point: object.point ?? false,
-      pos: {
-        x: object.x,
-        y: object.y,
-      },
       properties: getPropertyRecord(object.properties),
       rotation: object.rotation,
       type: object.type,
@@ -393,7 +385,7 @@ export function createMatchedObjectObjects(
 
       objects.push(
         k.add([
-          k.pos(context.pos.x, context.pos.y),
+          k.pos(context.x, context.y),
           k.anchor('topleft'),
           k.z(layer.zIndex),
           ...rule.comps(context),

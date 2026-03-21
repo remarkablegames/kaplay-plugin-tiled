@@ -19,9 +19,9 @@ k.onLoad(() => {
     objects: [
       {
         match: { properties: { collides: true } },
-        comps: ({ objectSize }) => [
+        comps: ({ height, width }) => [
           k.area({
-            shape: new k.Rect(k.vec2(), objectSize.width, objectSize.height),
+            shape: new k.Rect(k.vec2(), width, height),
           }),
           k.body({ isStatic: true }),
           'wall',
