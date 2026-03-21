@@ -67,6 +67,8 @@ function addTiledMap(k: KAPLAYCtx, map: TiledMap, opt: TiledMapOpt): void {
   });
 }
 
+export type AddTiledMap = (map: TiledMap, options: TiledMapOpt) => void;
+
 /**
  * KAPLAY plugin that adds `addTiledMap()` to the context.
  *
@@ -74,9 +76,9 @@ function addTiledMap(k: KAPLAYCtx, map: TiledMap, opt: TiledMapOpt): void {
  * @returns - The plugin API.
  */
 export function tiledPlugin(k: KAPLAYCtx) {
-  return {
-    addTiledMap(map: TiledMap, options: TiledMapOpt) {
-      addTiledMap(k, map, options);
-    },
+  const boundAddTiledMap: AddTiledMap = (map, options) => {
+    addTiledMap(k, map, options);
   };
+
+  return { addTiledMap: boundAddTiledMap };
 }

@@ -9,8 +9,6 @@ describe('dist/plugin.mjs', () => {
 
   it('adds plugin', () => {
     const k = {} as unknown as KAPLAYCtx;
-
-    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(tiledPlugin(k).addTiledMap).toBeTypeOf('function');
   });
 });

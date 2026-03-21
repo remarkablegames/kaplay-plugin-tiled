@@ -1,7 +1,7 @@
-import type { TiledMap, TiledMapOpt } from './dist/plugin';
+import type { AddTiledMap } from './dist/plugin';
 
 declare global {
-  var addTiledMap: (map: TiledMap, options: TiledMapOpt) => void;
+  var addTiledMap: AddTiledMap;
 }
 
 export {};
