@@ -32,18 +32,22 @@ npm install kaplay-plugin-tiled
 
 ## Usage
 
-Use the plugin in your game:
+Import the plugin:
 
 ```ts
 import kaplay from 'kaplay';
 import { tiledPlugin } from 'kaplay-plugin-tiled';
 
-import level from './level.json';
-import tilesetUrl from './tileset.png';
-
 const k = kaplay({
   plugins: [tiledPlugin()],
 });
+```
+
+Use the plugin:
+
+```ts
+import level from './level.json';
+import tilesetUrl from './tileset.png';
 
 k.loadSprite('tileset', tilesetUrl);
 
