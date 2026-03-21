@@ -1,8 +1,16 @@
-import { addTiledMap, tiledPlugin } from '../dist/plugin.mjs';
+import type { KAPLAYCtx } from 'kaplay';
+
+import { tiledPlugin } from '../dist/plugin.mjs';
 
 describe('dist/plugin.mjs', () => {
-  it('exports the tiled helpers', () => {
-    expect(addTiledMap).toBeTypeOf('function');
+  it('exports plugin', () => {
     expect(tiledPlugin).toBeTypeOf('function');
+  });
+
+  it('adds plugin', () => {
+    const k = {} as unknown as KAPLAYCtx;
+
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    expect(tiledPlugin(k).addTiledMap).toBeTypeOf('function');
   });
 });

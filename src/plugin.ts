@@ -30,11 +30,7 @@ declare module 'kaplay' {
  * @param map - The Tiled map data.
  * @param opt - The Tiled map options.
  */
-export function addTiledMap(
-  k: KAPLAYCtx,
-  map: TiledMap,
-  opt: TiledMapOpt,
-): void {
+function addTiledMap(k: KAPLAYCtx, map: TiledMap, opt: TiledMapOpt): void {
   const parsedMap = parseTiledMap(resolveTiledMap(k, map));
   const allowedLayerNames = getLayerNames(opt);
 

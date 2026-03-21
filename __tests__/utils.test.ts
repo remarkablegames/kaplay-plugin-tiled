@@ -1,6 +1,5 @@
 import level from '../example/level.json';
-import type { TiledMap, TiledMapOpt } from '../src/plugin';
-import { addTiledMap } from '../src/plugin';
+import { type TiledMap, type TiledMapOpt, tiledPlugin } from '../src/plugin';
 import {
   createMatchedObjectObjects,
   createMatchedTileObjects,
@@ -15,9 +14,20 @@ import {
   getZComponent,
 } from './test-helpers';
 
+function addTiledMapForTest(k: ReturnType<typeof createContext>['k']) {
+  return (
+    _k: ReturnType<typeof createContext>['k'],
+    map: TiledMap,
+    options: TiledMapOpt,
+  ) => {
+    tiledPlugin(k).addTiledMap(map, options);
+  };
+}
+
 describe('utils', () => {
   it('filters layers when layerNames are provided', () => {
     const { add, k } = createContext();
+    const addTiledMap = addTiledMapForTest(k);
     const options: TiledMapOpt = {
       layerNames: ['Missing'],
       sprite: 'tileset',
@@ -30,6 +40,7 @@ describe('utils', () => {
 
   it('spawns tile objects for matching gid, layer, and property rules', () => {
     const { add, area, body, k } = createContext();
+    const addTiledMap = addTiledMapForTest(k);
 
     addTiledMap(k, createMapFixture(), {
       sprite: 'tileset',
@@ -52,6 +63,7 @@ describe('utils', () => {
 
   it('does not spawn tile objects when tile rules fail tileId or layer matching', () => {
     const { add, k } = createContext();
+    const addTiledMap = addTiledMapForTest(k);
 
     addTiledMap(k, createMapFixture(), {
       sprite: 'tileset',
@@ -99,6 +111,7 @@ describe('utils', () => {
 
   it('spawns object objects for matching object-layer rules', () => {
     const { add, area, body, k } = createContext();
+    const addTiledMap = addTiledMapForTest(k);
 
     addTiledMap(k, level as TiledMap, {
       objects: [
@@ -127,6 +140,7 @@ describe('utils', () => {
 
   it('treats an empty layerNames filter like no filter', () => {
     const { add, k } = createContext();
+    const addTiledMap = addTiledMapForTest(k);
 
     addTiledMap(k, createMapFixture(), { layerNames: [], sprite: 'tileset' });
 
@@ -135,6 +149,7 @@ describe('utils', () => {
 
   it('skips invisible layers', () => {
     const { add, k } = createContext();
+    const addTiledMap = addTiledMapForTest(k);
 
     addTiledMap(
       k,
@@ -177,6 +192,7 @@ describe('utils', () => {
 
   it('rejects unsupported map orientations', () => {
     const { k } = createContext();
+    const addTiledMap = addTiledMapForTest(k);
 
     expect(() => {
       addTiledMap(k, { ...level, orientation: 'isometric' } as TiledMap, {
@@ -189,6 +205,7 @@ describe('utils', () => {
 
   it('rejects infinite maps', () => {
     const { k } = createContext();
+    const addTiledMap = addTiledMapForTest(k);
 
     expect(() => {
       addTiledMap(k, { ...level, infinite: true } as TiledMap, {
@@ -199,6 +216,7 @@ describe('utils', () => {
 
   it('rejects multiple tilesets', () => {
     const { k } = createContext();
+    const addTiledMap = addTiledMapForTest(k);
 
     expect(() => {
       addTiledMap(
@@ -214,6 +232,7 @@ describe('utils', () => {
 
   it('rejects tilesets without columns', () => {
     const { k } = createContext();
+    const addTiledMap = addTiledMapForTest(k);
 
     expect(() => {
       addTiledMap(
@@ -247,6 +266,7 @@ describe('utils', () => {
 
   it('rejects tile layers whose data length does not match their dimensions', () => {
     const { k } = createContext();
+    const addTiledMap = addTiledMapForTest(k);
 
     expect(() => {
       addTiledMap(
@@ -288,6 +308,7 @@ describe('utils', () => {
 
   it('throws when a tile gid is outside the supported tileset range', () => {
     const { k } = createContext();
+    const addTiledMap = addTiledMapForTest(k);
 
     expect(() => {
       addTiledMap(
@@ -309,6 +330,7 @@ describe('utils', () => {
 
   it('normalizes flipped gids for range checks, matching, and sprite quads', () => {
     const { add, drawSprite, k, quad } = createContext();
+    const addTiledMap = addTiledMapForTest(k);
 
     addTiledMap(
       k,
@@ -370,6 +392,7 @@ describe('utils', () => {
 
   it('renders diagonal-only flipped tiles with the expected transform', () => {
     const { add, drawSprite, k } = createContext();
+    const addTiledMap = addTiledMapForTest(k);
 
     addTiledMap(
       k,
@@ -407,6 +430,7 @@ describe('utils', () => {
 
   it('renders diagonal plus horizontal plus vertical flips with the expected transform', () => {
     const { add, drawSprite, k } = createContext();
+    const addTiledMap = addTiledMapForTest(k);
 
     addTiledMap(
       k,
@@ -444,6 +468,7 @@ describe('utils', () => {
 
   it('throws when a map asset key is missing', () => {
     const { getAsset, k } = createContext();
+    const addTiledMap = addTiledMapForTest(k);
     getAsset.mockReturnValue(null);
 
     expect(() => {
@@ -453,6 +478,7 @@ describe('utils', () => {
 
   it('throws when a map asset key is not ready yet', () => {
     const { getAsset, k } = createContext();
+    const addTiledMap = addTiledMapForTest(k);
     getAsset.mockReturnValue({ data: null });
 
     expect(() => {
@@ -462,6 +488,7 @@ describe('utils', () => {
 
   it('skips invisible object layers and invisible objects', () => {
     const { add, k } = createContext();
+    const addTiledMap = addTiledMapForTest(k);
 
     addTiledMap(k, createObjectMapFixture() as TiledMap, {
       objects: [
@@ -478,6 +505,7 @@ describe('utils', () => {
 
   it('preserves Tiled layer order for object and tile z indices', () => {
     const { add, k } = createContext();
+    const addTiledMap = addTiledMapForTest(k);
 
     addTiledMap(k, createOrderedLayerMapFixture() as TiledMap, {
       objects: [
@@ -496,6 +524,7 @@ describe('utils', () => {
 
   it('applies layerNames to object layers as well as tile layers', () => {
     const { add, k } = createContext();
+    const addTiledMap = addTiledMapForTest(k);
 
     addTiledMap(k, createOrderedLayerMapFixture() as TiledMap, {
       layerNames: ['Background'],
@@ -514,6 +543,7 @@ describe('utils', () => {
 
   it('does not spawn objects when object rules fail layer, name, or type matching', () => {
     const { add, k } = createContext();
+    const addTiledMap = addTiledMapForTest(k);
 
     addTiledMap(k, createObjectMapFixture() as TiledMap, {
       objects: [

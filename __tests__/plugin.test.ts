@@ -1,5 +1,5 @@
 import level from '../example/level.json';
-import { addTiledMap, type TiledMap, tiledPlugin } from '../src/plugin';
+import { type TiledMap, tiledPlugin } from '../src/plugin';
 import {
   createContext,
   createMapFixture,
@@ -10,8 +10,9 @@ import {
 describe('addTiledMap', () => {
   it('parses the repo fixture and creates one renderer per visible layer', () => {
     const { add, k } = createContext();
+    const api = tiledPlugin(k);
 
-    addTiledMap(k, level as TiledMap, { sprite: 'tileset' });
+    api.addTiledMap(level as TiledMap, { sprite: 'tileset' });
 
     expect(add).toHaveBeenCalledTimes(3);
     expect(add).toHaveBeenCalled();
@@ -19,8 +20,9 @@ describe('addTiledMap', () => {
 
   it('renders tiles through one layer renderer', () => {
     const { add, drawSprite, k, quad } = createContext();
+    const api = tiledPlugin(k);
 
-    addTiledMap(k, createMapFixture(), { sprite: 'tileset' });
+    api.addTiledMap(createMapFixture(), { sprite: 'tileset' });
 
     expect(add).toHaveBeenCalledTimes(1);
 
@@ -51,9 +53,10 @@ describe('addTiledMap', () => {
 
   it('accepts a loaded asset key for the map source', () => {
     const { add, getAsset, k } = createContext();
+    const api = tiledPlugin(k);
     getAsset.mockReturnValue({ data: createMapFixture() });
 
-    addTiledMap(k, 'level', { sprite: 'tileset' });
+    api.addTiledMap('level', { sprite: 'tileset' });
 
     expect(getAsset).toHaveBeenCalledWith('level');
     expect(add).toHaveBeenCalledOnce();
@@ -61,9 +64,9 @@ describe('addTiledMap', () => {
 
   it('uses the default visual path when opacity and colliders are absent', () => {
     const { add, area, body, drawSprite, k } = createContext();
+    const api = tiledPlugin(k);
 
-    addTiledMap(
-      k,
+    api.addTiledMap(
       {
         height: 1,
         infinite: false,
