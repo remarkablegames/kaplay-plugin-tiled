@@ -1,7 +1,7 @@
 {
   "name": "kaplay-plugin-tiled",
   "version": "1.0.0-alpha",
-  "description": "KAPLAY plugin template",
+  "description": "KAPLAY plugin for Tiled maps",
   "author": "Mark <mark@remarkablemark.org> (https://remarkablemark.org)",
   "main": "./dist/plugin.cjs",
   "module": "./dist/plugin.mjs",
@@ -31,7 +31,7 @@
     "prepublishOnly": "npm run build && npm run lint && npm run lint:tsc && npm run test:ci",
     "start": "vite --open",
     "test": "vitest run",
-    "test:ci": "CI=true npm test -- --color --coverage",
+    "test:ci": "CI=true npm test -- --color",
     "test:watch": "vitest --coverage.enabled=false"
   },
   "repository": {
@@ -44,6 +44,9 @@
   "keywords": [
     "kaplay",
     "plugin",
+    "tiled",
+    "map",
+    "json",
     "game"
   ],
   "peerDependencies": {
