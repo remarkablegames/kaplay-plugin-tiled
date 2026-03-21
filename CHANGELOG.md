@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/remarkablegames/kaplay-plugin-tiled/compare/v1.0.0...v1.1.0) (2026-03-21)
+
+
+### Features
+
+* **plugin:** export global types and simplify plugin API ([#3](https://github.com/remarkablegames/kaplay-plugin-tiled/issues/3)) ([3425323](https://github.com/remarkablegames/kaplay-plugin-tiled/commit/342532363eec20c5f3ce55f7696baec3ab07e0ec))
+
 ## 1.0.0 (2026-03-21)
 
 
