@@ -6,7 +6,7 @@
 [![build](https://github.com/remarkablegames/kaplay-plugin-tiled/actions/workflows/build.yml/badge.svg)](https://github.com/remarkablegames/kaplay-plugin-tiled/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/remarkablegames/kaplay-plugin-tiled/graph/badge.svg?token=WriHyIpFCh)](https://codecov.io/gh/remarkablegames/kaplay-plugin-tiled)
 
-[KAPLAY](https://kaplayjs.com/) plugin for loading finite orthogonal [Tiled](https://www.mapeditor.org/) JSON maps.
+[KAPLAY](https://kaplayjs.com/) plugin for loading finite orthogonal [Tiled](https://www.mapeditor.org/) JSON maps. See [demo](https://github.com/remarkablegames/kaplay-tiled-demo).
 
 ## Prerequisites
 
