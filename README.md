@@ -38,51 +38,53 @@ Import the plugin:
 import kaplay from 'kaplay';
 import { tiledPlugin } from 'kaplay-plugin-tiled';
 
-const k = kaplay({
+kaplay({
   plugins: [tiledPlugin],
 });
 ```
 
-Use the plugin:
+Load the assets:
 
 ```ts
 import level from './level.json';
 import tilesetUrl from './tileset.png';
 
-k.loadSprite('tileset', tilesetUrl);
+loadSprite('tileset', tilesetUrl);
+```
 
-k.onLoad(() => {
-  k.addTiledMap(level, {
-    sprite: 'tileset',
-    objects: [
-      {
-        match: { properties: { collides: true } },
-        comps: ({ width, height }) => [
-          k.area({
-            shape: new k.Rect(k.vec2(), width, height),
-          }),
-          k.body({ isStatic: true }),
-        ],
-      },
-    ],
-  });
+Render the tilemap:
+
+```ts
+addTiledMap(level, {
+  sprite: 'tileset',
 });
 ```
 
-If you use KAPLAY globals, load the ambient types explicitly:
+Or render the tilemap with objects:
+
+```ts
+addTiledMap(level, {
+  sprite: 'tileset',
+  objects: [
+    {
+      match: { properties: { collides: true } },
+      comps: ({ width, height }) => [
+        area({
+          shape: new Rect(vec2(), width, height),
+        }),
+        body({ isStatic: true }),
+      ],
+    },
+  ],
+});
+```
+
+If you use TypeScript, load the ambient types explicitly:
 
 ```ts
 import 'kaplay/global';
 import 'kaplay-plugin-tiled/global';
 ```
-
-This adds the ambient type for `addTiledMap(...)`. The runtime global still depends on KAPLAY's global setup.
-
-The current implementation is intentionally small:
-
-- finite orthogonal Tiled JSON only
-- 1 tileset per map
-- visible tile layers plus optional `tiles` and `objects` matchers for extra spawned components
 
 To load the plugin using a script:
 
@@ -91,7 +93,7 @@ To load the plugin using a script:
 <script src="https://unpkg.com/kaplay-plugin-tiled@latest/dist/plugin.umd.js"></script>
 
 <script>
-  const k = kaplay({
+  kaplay({
     plugins: [KaplayPluginTiled.tiledPlugin],
   });
 </script>
