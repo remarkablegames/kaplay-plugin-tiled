@@ -1,7 +1,6 @@
 import type { KAPLAYCtx } from 'kaplay';
 
 import { tiledPlugin } from '../dist/plugin.mjs';
-import type { AddTiledMap } from '../src/types';
 
 describe('dist/plugin.mjs', () => {
   it('exports plugin', () => {
@@ -10,7 +9,7 @@ describe('dist/plugin.mjs', () => {
 
   it('adds plugin', () => {
     const k = {} as unknown as KAPLAYCtx;
-    const plugin = tiledPlugin(k) as { addTiledMap: AddTiledMap };
+    const plugin = tiledPlugin(k);
 
     expect(plugin.addTiledMap).toBeTypeOf('function');
   });
