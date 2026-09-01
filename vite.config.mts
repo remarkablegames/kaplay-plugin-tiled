@@ -32,7 +32,7 @@ export default defineConfig({
   plugins: [
     dts({
       include: ['src'],
-      rollupTypes: true,
+      bundleTypes: true,
       afterBuild() {
         ['cts', 'mts'].forEach((extension) => {
           copyFileSync(
