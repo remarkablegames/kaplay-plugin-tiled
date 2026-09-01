@@ -1,5 +1,5 @@
 import level from '../example/level.json';
-import { type TiledMap, tiledPlugin } from '../src/plugin';
+import { tiledPlugin } from '../src/plugin';
 import {
   createContext,
   createMapFixture,
@@ -15,7 +15,7 @@ describe('addTiledMap', () => {
     const { add, k } = createContext();
     const api = tiledPlugin(k);
 
-    api.addTiledMap(level as TiledMap, { sprite: 'tileset' });
+    api.addTiledMap(level, { sprite: 'tileset' });
 
     expect(add).toHaveBeenCalledTimes(3);
     expect(add).toHaveBeenCalled();
@@ -204,7 +204,7 @@ describe('addTiledMap', () => {
     const { add, k } = createContext();
     const api = tiledPlugin(k);
 
-    api.addTiledMap(createObjectMapFixture() as TiledMap, {
+    api.addTiledMap(createObjectMapFixture(), {
       objects: [
         {
           comps: () => ['door'],
@@ -221,7 +221,7 @@ describe('addTiledMap', () => {
     const { add, k } = createContext();
     const api = tiledPlugin(k);
 
-    api.addTiledMap(createOrderedLayerMapFixture() as TiledMap, {
+    api.addTiledMap(createOrderedLayerMapFixture(), {
       objects: [
         {
           comps: () => ['door'],
@@ -240,7 +240,7 @@ describe('addTiledMap', () => {
     const { add, k } = createContext();
     const api = tiledPlugin(k);
 
-    api.addTiledMap(createOrderedLayerMapFixture() as TiledMap, {
+    api.addTiledMap(createOrderedLayerMapFixture(), {
       layerNames: ['Background'],
       objects: [
         {
