@@ -1,4 +1,3 @@
-import type { TiledMapData } from '../src/types';
 import {
   createLayerRenderer,
   createMatchedObjectObjects,
@@ -136,7 +135,7 @@ describe('parseTiledMap', () => {
       parseTiledMap({
         ...createMapFixture(),
         orientation: 'isometric',
-      } as TiledMapData);
+      });
     }).toThrow(
       'Unsupported Tiled orientation "isometric". Expected "orthogonal".',
     );
